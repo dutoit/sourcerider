@@ -1,0 +1,29 @@
+version: '3.7'
+
+services:
+  drupal:
+    build:
+      context: ./docker
+    ports:
+      - "8080:80"
+    volumes:
+      - ./drupal:/var/www/html
+    environment:
+      DB_NAME: "drupal"
+      DB_USER: "drupal"
+      DB_PASSWORD: "secret"
+      DB_HOST: "db"
+      DB_PORT: 3306
+
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_DATABASE: "drupal"
+      MYSQL_USER: "drupal"
+      MYSQL_PASSWORD: "secret"
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
