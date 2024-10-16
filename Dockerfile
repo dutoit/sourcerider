@@ -14,8 +14,8 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" &&
     php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
     php -r "unlink('composer-setup.php');"
 
-# Install Node.js
-RUN curl --silent --location https://rpm.nodesource.com/setup_18.x | bash - && \
+# Install Node.js v20
+RUN curl --silent --location https://rpm.nodesource.com/setup_20.x | bash - && \
     yum install -y nodejs && \
     yum clean all && rm -rf /var/cache/yum
 
