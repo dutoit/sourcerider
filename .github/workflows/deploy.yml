@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Use GitHub's Ubuntu runner
 
     steps:
       # Step 1: Checkout the code
@@ -20,15 +20,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      # Step 3: Set up Docker
-      - name: Install Docker
-        run: |
-          sudo yum update -y
-          sudo amazon-linux-extras install docker
-          sudo service docker start
-          docker --version
-
-      # Step 4: Build the Docker image
+      # Step 3: Build Docker image
       - name: Build Docker image
         env:
           DB_NAME: ${{ secrets.DB_NAME }}
@@ -39,14 +31,22 @@ jobs:
         run: |
           docker build -t drupal-app .
 
-      # Step 5: Deploy the Docker image to Lightsail
+      # Step 4: Deploy to Lightsail
       - name: Deploy to Lightsail
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.LIGHTSAIL_IP }} << 'EOF'
+            # Step 1: Update and Install Docker
+            sudo yum update -y
+            sudo amazon-linux-extras install docker
+            sudo service docker start
+            
+            # Step 2: Stop and remove existing container
             docker stop drupal-app || true
             docker rm drupal-app || true
-            docker build -t drupal-app .
+            
+            # Step 3: Run the new Docker container from the built image
             docker run -d -p 80:80 \
+              --name drupal-app \
               -e DB_NAME=${{ secrets.DB_NAME }} \
               -e DB_USER=${{ secrets.DB_USER }} \
               -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
